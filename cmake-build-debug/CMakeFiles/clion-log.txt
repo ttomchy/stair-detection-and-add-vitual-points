@@ -1,0 +1,27 @@
+/home/chenhy/Downloads/clion-2016.3.5/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/chenhy/work_space/laser_ws_origin/src/depth_clustering
+-- CMake version: 3.6.3
+-- Linux distribution: Ubuntu 14.04.5 LTS
+-- Target architecture: x86_64
+-- DISTRO: Ubuntu 14.04.5 LTS
+-- CMAKE_BUILD_TYPE: Debug
+-- Found google test sources in /usr/src/gtest/
+CMake Error at CMakeLists.txt:60 (find_package):
+  By not providing "FindEigen3.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "Eigen3", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "Eigen3" with any
+  of the following names:
+
+    Eigen3Config.cmake
+    eigen3-config.cmake
+
+  Add the installation prefix of "Eigen3" to CMAKE_PREFIX_PATH or set
+  "Eigen3_DIR" to a directory containing one of the above files.  If "Eigen3"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+
+
+-- Configuring incomplete, errors occurred!
+See also "/home/chenhy/work_space/laser_ws_origin/src/depth_clustering/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+See also "/home/chenhy/work_space/laser_ws_origin/src/depth_clustering/cmake-build-debug/CMakeFiles/CMakeError.log".
