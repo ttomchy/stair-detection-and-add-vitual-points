@@ -23,46 +23,49 @@ namespace depth_clustering {
 /**
  * @brief      A point class that holds additional ring information
  */
-class RichPoint {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  RichPoint() {}
-  explicit RichPoint(float x, float y, float z) : _point(x, y, z) {}
-  explicit RichPoint(float x, float y, float z, uint16_t ring)
-      : _point{x, y, z}, _ring{ring} {}
-  explicit RichPoint(Eigen::Vector3f& eigen_vec) : _point(eigen_vec) {}
-  ~RichPoint() {}
+    class RichPoint {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+        RichPoint() {}
+        explicit RichPoint(float x, float y, float z) : _point(x, y, z) {}
+        explicit RichPoint(float x, float y, float z, uint16_t ring, int flag_num)
+                : _point{x, y, z}, _ring{ring},_flag_num{flag_num} {}
+        explicit RichPoint(Eigen::Vector3f& eigen_vec) : _point(eigen_vec) {}
+        ~RichPoint() {}
 
-  inline int ring() const { return _ring; }
-  inline float x() const { return _point.x(); }
-  inline float y() const { return _point.y(); }
-  inline float z() const { return _point.z(); }
+        inline int flag_num() const { return _flag_num; }
+        inline int ring() const { return _ring; }
+        inline float x() const { return _point.x(); }
+        inline float y() const { return _point.y(); }
+        inline float z() const { return _point.z(); }
 
-  inline uint16_t& ring() { return _ring; }
-  inline float& x() { return _point.x(); }
-  inline float& y() { return _point.y(); }
-  inline float& z() { return _point.z(); }
+        inline int &flag_num()  { return _flag_num; }
+        inline uint16_t& ring() { return _ring; }
+        inline float& x() { return _point.x(); }
+        inline float& y() { return _point.y(); }
+        inline float& z() { return _point.z(); }
 
-  inline const Eigen::Vector3f& AsEigenVector() const { return _point; }
-  inline Eigen::Vector3f& AsEigenVector() { return _point; }
+        inline const Eigen::Vector3f& AsEigenVector() const { return _point; }
+        inline Eigen::Vector3f& AsEigenVector() { return _point; }
 
-  inline float DistToSensor2D() const {
-    return sqrt(_point.x() * _point.x() + _point.y() * _point.y());
-  }
+        inline float DistToSensor2D() const {
+            return sqrt(_point.x() * _point.x() + _point.y() * _point.y());
+        }
 
-  inline float DistToSensor3D() const {
-    return sqrt(_point.x() * _point.x() + _point.y() * _point.y() +
-                _point.z() * _point.z());
-  }
+        inline float DistToSensor3D() const {
+            return sqrt(_point.x() * _point.x() + _point.y() * _point.y() +
+                        _point.z() * _point.z());
+        }
 
-  RichPoint& operator=(const RichPoint& other);
-  RichPoint& operator=(const Eigen::Vector3f& other);
-  bool operator==(const RichPoint& other) const;
+        RichPoint& operator=(const RichPoint& other);
+        RichPoint& operator=(const Eigen::Vector3f& other);
+        bool operator==(const RichPoint& other) const;
 
- private:
-  Eigen::Vector3f _point = Eigen::Vector3f::Zero();
-  uint16_t _ring = 0;
-};
+    private:
+        Eigen::Vector3f _point = Eigen::Vector3f::Zero();
+        uint16_t _ring = 0;
+        int _flag_num=0;
+    };
 
 }  // namespace depth_clustering
 

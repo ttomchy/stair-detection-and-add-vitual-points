@@ -95,7 +95,11 @@ class ImageBasedClusterer : public AbstractClusterer {
       fprintf(stderr, "INFO: cannot label this cloud.\n");
       return;
     }
+
+
+
     time_utils::Timer timer;
+
     LabelerT image_labeler(cloud.projection_ptr()->depth_image(),
                            cloud.projection_ptr()->params(), _angle_tollerance);
     image_labeler.ComputeLabels(_diff_type);
@@ -113,6 +117,8 @@ class ImageBasedClusterer : public AbstractClusterer {
 
     // create 3d clusters from image labels
     std::unordered_map<uint16_t, Cloud> clusters;
+
+
     for (int row = 0; row < labels_ptr->rows; ++row) {
       for (int col = 0; col < labels_ptr->cols; ++col) {
         const auto& point_container = cloud.projection_ptr()->at(row, col);
@@ -147,8 +153,13 @@ class ImageBasedClusterer : public AbstractClusterer {
 
     fprintf(stderr, "INFO: prepared clusters in: %lu us\n", timer.measure());
 
-    this->ShareDataWithAllClients(clusters);
+
+    // create 3d clusters from image labels
+    //  std::unordered_map<uint16_t, Cloud> clusters;
+
+      this->ShareDataWithAllClients(clusters);
     fprintf(stderr, "INFO: clusters shared: %lu us\n", timer.measure());
+
   }
 
  private:

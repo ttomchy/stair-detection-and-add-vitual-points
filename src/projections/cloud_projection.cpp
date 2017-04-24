@@ -36,14 +36,29 @@ CloudProjection::CloudProjection(const ProjectionParams& params)
 }
 
 RichPoint CloudProjection::UnprojectPoint(const cv::Mat& image, const int row,
-                                          const int col) const {
+                                          const int col ,const cv::Mat& bin_image) const {
   float depth = image.at<float>(row, col);
   Radians angle_z = this->_params.AngleFromRow(row);
   Radians angle_xy = this->_params.AngleFromCol(col);
-  RichPoint point{depth * cosf(angle_z.val()) * cosf(angle_xy.val()),
-                  depth * cosf(angle_z.val()) * sinf(angle_xy.val()),
-                  depth * sinf(angle_z.val())};
-  return point;
+
+    if (  bin_image.at<uchar>(row,col)==255) {
+
+
+        RichPoint point{depth * cosf(angle_z.val()) * cosf(angle_xy.val()),
+                        depth * cosf(angle_z.val()) * sinf(angle_xy.val()),
+                        depth * sinf(angle_z.val())};
+         point.flag_num() = 255;
+        //std::cout<<"the value of  the point.flag_num() = 255;"<<std::endl;
+        return point;
+    }
+    else{
+        //std::cout<<"the value of  the point.flag_num() = 0;"<<std::endl;
+        RichPoint point{depth * cosf(angle_z.val()) * cosf(angle_xy.val()),
+                        depth * cosf(angle_z.val()) * sinf(angle_xy.val()),
+                        depth * sinf(angle_z.val())};
+        return point;
+    }
+
 }
 
 void CloudProjection::CheckCloudAndStorage(

@@ -43,9 +43,9 @@ class RingProjection : public CloudProjection {
   CloudProjection::Ptr Clone() const override;
   virtual ~RingProjection() {}
 
- protected:
+ //protected:
   RichPoint UnprojectPoint(const cv::Mat& image, const int row,
-                           const int col) const override;
+                           const int col,const cv::Mat& bin_image) ;//const override;
 };
 
 }  // namespace depth_clustering

@@ -108,7 +108,7 @@ class CloudProjection {
    * @return     { description_of_the_return_value }
    */
   virtual RichPoint UnprojectPoint(const cv::Mat& image, const int row,
-                                   const int col) const;
+                                   const int col,const cv::Mat& bin_image) const;
 
  protected:
   // just stores addresses of the points. Does not own them.

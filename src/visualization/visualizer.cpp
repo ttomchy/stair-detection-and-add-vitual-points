@@ -21,7 +21,7 @@
 #include <limits>
 #include <string>
 #include <vector>
-
+extern cv::Mat binary_self_me_img(64,870, CV_8UC1);
 namespace depth_clustering {
 
 using std::string;
@@ -47,6 +47,7 @@ Visualizer::Visualizer(QWidget* parent)
 void Visualizer::draw() {
   lock_guard<mutex> guard(_cloud_mutex);
   DrawCloud(_cloud);
+
   for (const auto& kv : _cloud_obj_storer.object_clouds()) {
     const auto& cluster = kv.second;
     Eigen::Vector3f center = Eigen::Vector3f::Zero();
@@ -72,6 +73,13 @@ void Visualizer::draw() {
     }
     DrawCube(center, extent);
   }
+    /*
+    for (int r = 0; r < 64; ++r) {
+        for (int c = 0; c < 870; ++c) {
+            binary_self_me_img.at<uchar>(r,c)=0;
+        }
+    }
+     */
 }
 
 void Visualizer::init() {
@@ -83,12 +91,24 @@ void Visualizer::init() {
 void Visualizer::DrawCloud(const Cloud& cloud) {
   glPushMatrix();
   glBegin(GL_POINTS);
-  glColor3f(1.0f, 1.0f, 1.0f);
+ // glColor3f(1.0f, 1.0f, 1.0f);
+  //glColor3f(1.0f, 0.0f, 0.0f);
+
   for (const auto& point : cloud.points()) {
-    glVertex3f(point.x(), point.y(), point.z());
+    if ( point.flag_num() == 255){
+      glColor3f(1.0f, 0.0f, 0.0f);
+      glVertex3f(point.x(), point.y(), point.z());
+
+    }
+    else {
+      glColor3f(0.0f, 1.0f, 0.0f);
+      glVertex3f(point.x(), point.y(), point.z());
+
+    }
   }
   glEnd();
   glPopMatrix();
+
 }
 
 void Visualizer::DrawCube(const Eigen::Vector3f& center,

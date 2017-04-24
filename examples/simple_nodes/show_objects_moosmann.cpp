@@ -31,12 +31,11 @@
 #include "utils/timer.h"
 #include "utils/velodyne_utils.h"
 #include "visualization/visualizer.h"
-
+//#inlcude "show_objects_moosmann2.h"
 #include "tclap/CmdLine.h"
 
 using std::string;
 using std::to_string;
-
 using namespace depth_clustering;
 
 void ReadData(const Radians& angle_tollerance, const string& in_path,
@@ -70,13 +69,18 @@ void ReadData(const Radians& angle_tollerance, const string& in_path,
 
   for (const auto& path : image_reader.GetAllFilePaths()) {
     auto depth_image = MatFromDepthPng(path);
-    auto cloud_ptr = Cloud::FromImage(depth_image, *proj_params_ptr);
+
+    auto cloud_ptr = Cloud::FromImage(depth_image, *proj_params_ptr/*,binary_self_me_img*/);
     time_utils::Timer timer;
     visualizer->OnNewObjectReceived(*cloud_ptr, 0);
+
     depth_ground_remover.OnNewObjectReceived(*cloud_ptr, 0);
-    auto current_millis = timer.measure(time_utils::Timer::Units::Milli);
-    fprintf(stderr, "INFO: It took %lu ms to process and show everything.\n",
-            current_millis);
+   // auto current_millis = timer.measure(time_utils::Timer::Units::Milli);
+   // fprintf(stderr, "INFO: It took %lu ms to process and show everything.\n",
+     //       current_millis);
+
+    //  sleep(1.4);
+      /*
     uint max_wait_time = 100;
     if (current_millis > max_wait_time) {
       continue;
@@ -84,6 +88,14 @@ void ReadData(const Radians& angle_tollerance, const string& in_path,
     auto time_to_wait = max_wait_time - current_millis;
     fprintf(stderr, "INFO: Waiting another %lu ms.\n", time_to_wait);
     std::this_thread::sleep_for(std::chrono::milliseconds(time_to_wait));
+
+
+      */
+
+
+
+
+
   }
 }
 

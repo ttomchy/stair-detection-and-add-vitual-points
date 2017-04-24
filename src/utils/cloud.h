@@ -29,7 +29,7 @@
 #include <vector>
 
 #include "projections/cloud_projection.h"
-#include "projections/ring_projection.h"
+
 #include "projections/spherical_projection.h"
 #include "utils/pose.h"
 #include "utils/useful_typedefs.h"
@@ -91,7 +91,7 @@ class Cloud {
   void InitProjection(const ProjectionParams& params);
 
   static Cloud::Ptr FromImage(const cv::Mat& image,
-                              const ProjectionParams& params);
+                              const ProjectionParams& params/*,const cv::Mat &bin_image*/);
 
 // PCL specific part
 #if PCL_FOUND

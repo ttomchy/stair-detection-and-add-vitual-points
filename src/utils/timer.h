@@ -18,6 +18,7 @@
 
 #include <chrono>
 
+// cv::Mat binary_self_me_img;
 namespace depth_clustering {
 
 namespace time_utils {

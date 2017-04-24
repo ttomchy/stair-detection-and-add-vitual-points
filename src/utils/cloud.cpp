@@ -14,7 +14,10 @@
 // with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utils/cloud.h"
+#include "utils/timer.h"
+#include "projections/ring_projection.h"
 
+extern cv::Mat binary_self_me_img(64,870, CV_8UC1);
 namespace depth_clustering {
 
 Cloud::Cloud(const Cloud& cloud)
@@ -74,7 +77,7 @@ void Cloud::InitProjection(const ProjectionParams& params) {
 }
 
 Cloud::Ptr Cloud::FromImage(const cv::Mat& image,
-                            const ProjectionParams& params) {
+                            const ProjectionParams& params /*,const cv::Mat& bin_image*/) {
   CloudProjection::Ptr proj = CloudProjection::Ptr(new RingProjection(params));
   proj->CheckImageAndStorage(image);
   proj->CloneDepthImage(image);
@@ -84,9 +87,21 @@ Cloud::Ptr Cloud::FromImage(const cv::Mat& image,
       if (image.at<float>(r, c) < 0.0001f) {
         continue;
       }
-      RichPoint point = proj->UnprojectPoint(image, r, c);
-      cloud.push_back(point);
-      proj->at(r, c).points().push_back(cloud.points().size() - 1);
+        /*
+        if (  bin_image.at<uchar>(r,c)==255){
+        RichPoint point = proj->UnprojectPoint(image, r, c);
+        point.flag_num() = 255;
+        std::cout<<"the value of the point.flag_num()=255; in the coud.cpp "<<std::endl;
+            cloud.push_back(point);
+            proj->at(r, c).points().push_back(cloud.points().size() - 1);
+        }
+        else{
+         */
+            RichPoint point = proj->UnprojectPoint(image, r, c,binary_self_me_img);
+            cloud.push_back(point);
+            proj->at(r, c).points().push_back(cloud.points().size() - 1);
+       // }
+
     }
   }
   cloud.SetProjectionPtr(proj);

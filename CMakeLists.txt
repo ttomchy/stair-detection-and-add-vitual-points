@@ -164,6 +164,4 @@ add_subdirectory(src)
 add_subdirectory(examples)
 
 message(STATUS "BUILD_TESTING: ${BUILD_TESTING}")
-if (${BUILD_TESTING})
-  add_subdirectory(test)
-endif()
+

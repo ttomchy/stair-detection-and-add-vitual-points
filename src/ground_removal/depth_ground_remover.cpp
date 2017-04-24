@@ -25,6 +25,10 @@
 #include "image_labelers/diff_helpers/simple_diff.h"
 #include "utils/timer.h"
 
+
+cv::Mat binary_self_me_img(64,870, CV_8UC1);//=cv::Mat::zeros(64,870, CV_8UC1);
+int i_no_ground_image=0;
+char img_name_no_ground_image[6000];
 namespace depth_clustering {
 
 using cv::Mat;
@@ -39,23 +43,46 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud,
                                              const int sender_id) {
   // this can be done even faster if we switch to column-major implementation
   // thus allowing us to load whole row in L1 cache
+
+    for (int r = 0; r < 64; ++r) {
+        for (int c = 0; c < 870; ++c) {
+            binary_self_me_img.at<uchar>(r,c)=0;
+        }
+    }
+
   if (!cloud.projection_ptr()) {
     fprintf(stderr, "No projection in cloud. Skipping ground removal.\n");
     return;
   }
   Cloud cloud_copy(cloud);
+
   const cv::Mat& depth_image =
       RepairDepth(cloud.projection_ptr()->depth_image(), 5, 1.0f);
   Timer total_timer;
+
   auto angle_image = CreateAngleImage(depth_image);
   auto smoothed_image = ApplySavitskyGolaySmoothing(angle_image, _window_size);
   auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image,
                                           _ground_remove_angle, _window_size);
+
+ //   auto no_ground_image = ZeroOutGround(depth_image, smoothed_image,
+                                       //     _ground_remove_angle);
+
+
+    sprintf(img_name_no_ground_image, "%s%d%s", ".//result//no_ground_image//no_ground_image", ++i_no_ground_image, ".png");
+    cv::imwrite(img_name_no_ground_image,no_ground_image);
+
+
   fprintf(stderr, "INFO: Ground removed in %lu us\n", total_timer.measure());
   cloud_copy.projection_ptr()->depth_image() = no_ground_image;
+
+
+
   this->ShareDataWithAllClients(cloud_copy);
   _counter++;
 }
+
+
 
 Mat DepthGroundRemover::ZeroOutGround(const cv::Mat& image,
                                       const cv::Mat& angle_image,
@@ -68,6 +95,7 @@ Mat DepthGroundRemover::ZeroOutGround(const cv::Mat& image,
     for (int c = 0; c < image.cols; ++c) {
       if (angle_image.at<float>(r, c) > threshold.val()) {
         res.at<float>(r, c) = image.at<float>(r, c);
+          binary_self_me_img.at<uchar>(r,c)=255;
       }
     }
   }
@@ -114,6 +142,7 @@ Mat DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image,
       if (dilated.at<uint16_t>(r, c) == 0) {
         // all unlabeled points are non-ground
         res.at<float>(r, c) = image.at<float>(r, c);
+        binary_self_me_img.at<uchar>(r,c)=255;
       }
     }
   }

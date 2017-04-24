@@ -54,8 +54,10 @@ CloudProjection::Ptr RingProjection::Clone() const {
 }
 
 RichPoint RingProjection::UnprojectPoint(const cv::Mat& image, const int row,
-                                         const int col) const {
-  RichPoint point = CloudProjection::UnprojectPoint(image, row, col);
+                                         const int col,const cv::Mat& bin_image)  {
+
+
+  RichPoint point = CloudProjection::UnprojectPoint(image,row,col,bin_image);
   point.ring() = row;
   return point;
 }
