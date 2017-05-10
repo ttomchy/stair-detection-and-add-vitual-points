@@ -78,6 +78,12 @@ class DepthGroundRemover : public AbstractClient<Cloud>,
   cv::Mat ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_image,
                            const Radians& threshold, int kernel_size) const;
 
+  void ZeroOutGround_stair(const cv::Mat& image,
+                                               const cv::Mat& angle_image,
+                                               const Radians& threshold) const ;
+
+
+
   /**
    * @brief      create a help image with angle in radians written for each
    *             pixel

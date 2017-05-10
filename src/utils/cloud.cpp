@@ -17,7 +17,7 @@
 #include "utils/timer.h"
 #include "projections/ring_projection.h"
 
-extern cv::Mat binary_self_me_img(64,870, CV_8UC1);
+extern cv::Mat binary_self_me_img;//(16,870, CV_8UC1);
 namespace depth_clustering {
 
 Cloud::Cloud(const Cloud& cloud)
@@ -87,6 +87,7 @@ Cloud::Ptr Cloud::FromImage(const cv::Mat& image,
       if (image.at<float>(r, c) < 0.0001f) {
         continue;
       }
+
         /*
         if (  bin_image.at<uchar>(r,c)==255){
         RichPoint point = proj->UnprojectPoint(image, r, c);

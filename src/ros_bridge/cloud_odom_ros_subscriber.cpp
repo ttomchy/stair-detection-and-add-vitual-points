@@ -102,6 +102,7 @@ void CloudOdomRosSubscriber::StartListeningToRos() {
     _subscriber_clouds = new Subscriber<PointCloud2>(
         *_node_handle, _topic_clouds, _msg_queue_size);
     _subscriber_clouds->registerCallback(
+
         &CloudOdomRosSubscriber::CallbackVelodyne, this);
   }
 }

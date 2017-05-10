@@ -21,14 +21,17 @@
 #include <limits>
 #include <string>
 #include <vector>
-extern cv::Mat binary_self_me_img(64,870, CV_8UC1);
+
+extern cv::Mat binary_point_flag;
+extern int  points_flag[16][870];
+
 namespace depth_clustering {
 
 using std::string;
 using std::vector;
 using std::array;
 using std::to_string;
-
+int  i_count2=0;
 using std::map;
 using std::mutex;
 using std::string;
@@ -48,6 +51,7 @@ void Visualizer::draw() {
   lock_guard<mutex> guard(_cloud_mutex);
   DrawCloud(_cloud);
 
+/*
   for (const auto& kv : _cloud_obj_storer.object_clouds()) {
     const auto& cluster = kv.second;
     Eigen::Vector3f center = Eigen::Vector3f::Zero();
@@ -58,6 +62,7 @@ void Visualizer::draw() {
     Eigen::Vector3f min_point(std::numeric_limits<float>::max(),
                               std::numeric_limits<float>::max(),
                               std::numeric_limits<float>::max());
+
     for (const auto& point : cluster.points()) {
       center = center + point.AsEigenVector();
       min_point << std::min(min_point.x(), point.x()),
@@ -73,6 +78,10 @@ void Visualizer::draw() {
     }
     DrawCube(center, extent);
   }
+
+*/
+
+
     /*
     for (int r = 0; r < 64; ++r) {
         for (int c = 0; c < 870; ++c) {
@@ -88,28 +97,106 @@ void Visualizer::init() {
   glDisable(GL_LIGHTING);
 }
 
-void Visualizer::DrawCloud(const Cloud& cloud) {
+/*
+    void Visualizer::DrawCloud(const std::vector<RichPoint>& points) {
+      glPushMatrix();
+      glBegin(GL_POINTS);
+      // glColor3f(1.0f, 1.0f, 1.0f);
+      //glColor3f(1.0f, 0.0f, 0.0f);
+      for (size_t index = 0; index < points.size(); ++index) {
+     // for (const auto& point : cloud.points()) {
+
+        if ( point.flag_num() == 1){
+          glColor3f(0.0f, 1.0f, 0.0f);
+          glVertex3f(point.x(), point.y(), point.z());
+        }
+        else {
+          glColor3f(1.0f, 0.0f, 0.0f);
+          glVertex3f(point.x(), point.y(), point.z());
+
+        }
+
+        i_count2++;
+
+      }
+      std::cout<<" the valur of the i_count2 is :"<<i_count2<<std::endl;
+      i_count2=0;
+      glEnd();
+      glPopMatrix();
+
+    }
+*/
+ void Visualizer::DrawCloud(const Cloud& cloud) {
   glPushMatrix();
   glBegin(GL_POINTS);
  // glColor3f(1.0f, 1.0f, 1.0f);
   //glColor3f(1.0f, 0.0f, 0.0f);
 
-  for (const auto& point : cloud.points()) {
-    if ( point.flag_num() == 255){
-      glColor3f(1.0f, 0.0f, 0.0f);
-      glVertex3f(point.x(), point.y(), point.z());
+   // for (const auto& point : cloud.points()) { //在这里会遍历所有的point 点
+       std::cout<<"THE VALUE OF THE  cloud.size() IS :"<<cloud.size()<<std::endl;
 
-    }
-    else {
-      glColor3f(0.0f, 1.0f, 0.0f);
-      glVertex3f(point.x(), point.y(), point.z());
 
-    }
+/*
+        for (int r = 0; r < 16; ++r) {
+            for (int c = 0; c < 870; ++c) {
+
+                index =points_flag[r][c];
+                const auto& point = cloud[index];
+                if( binary_point_flag.at<uchar>(r,c)==0) {
+                    glColor3f(0.0f, 1.0f, 0.0f);
+                    glVertex3f(point.x(), point.y(), point.z());
+                }
+                else{
+
+                    glColor3f(1.0f, 0.0f, 0.0f);
+                    glVertex3f(point.x(), point.y(), point.z());
+
+                }
+
+
+            }
+        }
+
+*/
+  int ground_count2=0;
+
+  for (int index = 0; index < cloud.size(); ++index) {
+
+
+      const auto& point = cloud[index];
+      for (int r = 0; r < 16; ++r) {
+          for (int c = 0; c < 870; ++c) {
+
+
+          if(points_flag[r][c]==index ){
+
+              if( binary_point_flag.at<uchar>(r,c)==0) {
+                  ground_count2++;
+                  glColor3f(0.0f, 1.0f, 0.0f);
+                  glVertex3f(point.x(), point.y(), point.z());
+              }
+              else{
+
+                  glColor3f(1.0f, 0.0f, 0.0f);
+                  glVertex3f(point.x(), point.y(), point.z());
+
+              }
+             }
+          }
+      }
+
+      ground_count2++;
   }
+
+  std::cout<<" the valur of the ground_count2 is :"<<ground_count2<<std::endl;
+
+  i_count2=0;
   glEnd();
   glPopMatrix();
 
 }
+
+
 
 void Visualizer::DrawCube(const Eigen::Vector3f& center,
                           const Eigen::Vector3f& scale) {

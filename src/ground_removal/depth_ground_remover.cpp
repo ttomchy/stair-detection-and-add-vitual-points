@@ -25,16 +25,21 @@
 #include "image_labelers/diff_helpers/simple_diff.h"
 #include "utils/timer.h"
 
+ cv::Mat binary_self_me_img(16,870, CV_8UC1);//=cv::Mat::zeros(64,870, CV_8UC1);
 
-cv::Mat binary_self_me_img(64,870, CV_8UC1);//=cv::Mat::zeros(64,870, CV_8UC1);
-int i_no_ground_image=0;
+cv::Mat binary_point_flag(16,870, CV_8UC1);//=cv::Mat::zeros(64,870, CV_8UC1);
+
+int i_no_groeund_image=0;
+char img_namround_image[6000];
 char img_name_no_ground_image[6000];
+char i_no_ground_image=0;
 namespace depth_clustering {
-
+int oui_nnd_image=0;
 using cv::Mat;
 using cv::DataType;
 using std::to_string;
 using time_utils::Timer;
+
 
 const cv::Point ANCHOR_CENTER = cv::Point(-1, -1);
 const int SAME_OUTPUT_TYPE = -1;
@@ -44,11 +49,15 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud,
   // this can be done even faster if we switch to column-major implementation
   // thus allowing us to load whole row in L1 cache
 
-    for (int r = 0; r < 64; ++r) {
+    for (int r = 0; r < 16; ++r) {
         for (int c = 0; c < 870; ++c) {
-            binary_self_me_img.at<uchar>(r,c)=0;
+            binary_self_me_img.at<uchar>(r,c)=255;
+
+            binary_point_flag.at<uchar>(r,c)=255;//y用于知道哪些点对应的为地面
         }
     }
+
+  //sleep(1.0);
 
   if (!cloud.projection_ptr()) {
     fprintf(stderr, "No projection in cloud. Skipping ground removal.\n");
@@ -59,18 +68,22 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud,
   const cv::Mat& depth_image =
       RepairDepth(cloud.projection_ptr()->depth_image(), 5, 1.0f);
   Timer total_timer;
-
+ //在depth cloud-projection.cpp 判断了三维点云数据坐标的，在哪里添加标志位，并且进行计算。
   auto angle_image = CreateAngleImage(depth_image);
   auto smoothed_image = ApplySavitskyGolaySmoothing(angle_image, _window_size);
-  auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image,
-                                          _ground_remove_angle, _window_size);
+  //auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image,
+                                  //      _ground_remove_angle, _window_size);
 
- //   auto no_ground_image = ZeroOutGround(depth_image, smoothed_image,
-                                       //     _ground_remove_angle);
+  auto no_ground_image = ZeroOutGround(depth_image, smoothed_image,
+                                          _ground_remove_angle);
 
 
-    sprintf(img_name_no_ground_image, "%s%d%s", ".//result//no_ground_image//no_ground_image", ++i_no_ground_image, ".png");
-    cv::imwrite(img_name_no_ground_image,no_ground_image);
+    //sprintf(img_namround_image, "%s%d%s", ".//result//up_down_stair//up_down_stair", ++i_no_groeund_image, ".png");
+    //cv::imwrite(img_namround_image,cloud.projection_ptr()->depth_image());
+
+    ZeroOutGround_stair(depth_image, smoothed_image,
+                        _ground_remove_angle);
+
 
 
   fprintf(stderr, "INFO: Ground removed in %lu us\n", total_timer.measure());
@@ -82,7 +95,49 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud,
   _counter++;
 }
 
+    void DepthGroundRemover::ZeroOutGround_stair(const cv::Mat& image,
+                                                 const cv::Mat& angle_image,
+                                                 const Radians& threshold) const {
+        // TODO(igor): test if its enough to remove only values starting from the
+        // botom pixel. I don't like removing all values based on a threshold.
+        // But that's a start, so let's stick with it for now.
+        float k[9]={
+                1,1,1,
+                0,0,0,
+                -1,-1,-1};  //卷积3*3的核
+        Mat Km;
+        Km = cv::Mat(3,3,CV_32F,k);
+        Mat dst;
+        filter2D(image, dst, image.depth(),Km,cv::Point(-1,-1));  //设参考点为核的中心
 
+        Mat binary_self = Mat::zeros(image.rows,image.cols, CV_8UC1);
+       // ofstream fout("mytest.txt");
+        //if(!fout)
+      //  {
+      //      cout<<"File Not Opened"<<endl;
+      //  }
+
+        for (int r = 0; r < dst.rows; ++r) {
+            for (int c = 0; c <dst.cols; ++c) {
+
+               // fout<<image.at<float>(r,c)<<"\t";
+                if(dst.at<float>(r, c)>-100){
+                   // binary_self.at<uchar>(r,c)=255;
+                    binary_self_me_img.at<uchar>(r, c) = 0;
+                    //std::cout<<"THE VALUE OF THE IS:"<<dst.at<float>(r, c)<<std::endl;
+                } else {
+                    std::cout << "THE VALUE OF THE IS:" << dst.at<float>(r, c) << std::endl;
+                }
+            }
+
+            //fout<<std::endl;
+        }
+       // fout.close();
+       // sprintf(img_name_no_ground_image, "%s%d%s", ".//result//dst//dst", ++oui_nnd_image, ".png");
+       // cv::imwrite(img_name_no_ground_image, dst);
+
+
+    }
 
 Mat DepthGroundRemover::ZeroOutGround(const cv::Mat& image,
                                       const cv::Mat& angle_image,
@@ -90,15 +145,27 @@ Mat DepthGroundRemover::ZeroOutGround(const cv::Mat& image,
   // TODO(igor): test if its enough to remove only values starting from the
   // botom pixel. I don't like removing all values based on a threshold.
   // But that's a start, so let's stick with it for now.
+    int ground_count=0;
   Mat res = cv::Mat::zeros(image.size(), CV_32F);
   for (int r = 0; r < image.rows; ++r) {
     for (int c = 0; c < image.cols; ++c) {
       if (angle_image.at<float>(r, c) > threshold.val()) {
-        res.at<float>(r, c) = image.at<float>(r, c);
-          binary_self_me_img.at<uchar>(r,c)=255;
+
+          res.at<float>(r, c) = image.at<float>(r, c);
+
+          binary_point_flag.at<uchar>(r,c)=0;
+
+          ground_count++;
+
       }
     }
   }
+
+    std::cout<<"The value of the ground_count is:"<<ground_count<<std::endl;
+    ground_count=0;
+  sprintf(img_name_no_ground_image, "%s%d%s", ".//result//binary_image//binary_iamge", ++i_no_ground_image, ".png");
+  cv::imwrite(img_name_no_ground_image,binary_point_flag);
+
   return res;
 }
 
@@ -146,6 +213,9 @@ Mat DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image,
       }
     }
   }
+
+
+
   return res;
 }
 

@@ -47,6 +47,7 @@ void RingProjection::InitFromPoints(const std::vector<RichPoint>& points) {
     }
   }
   fprintf(stderr, "Cloud projected in %lu us\n", timer.measure());
+
 }
 
 CloudProjection::Ptr RingProjection::Clone() const {

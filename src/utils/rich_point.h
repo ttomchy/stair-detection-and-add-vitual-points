@@ -64,7 +64,7 @@ namespace depth_clustering {
     private:
         Eigen::Vector3f _point = Eigen::Vector3f::Zero();
         uint16_t _ring = 0;
-        int _flag_num=0;
+        int _flag_num=255;
     };
 
 }  // namespace depth_clustering

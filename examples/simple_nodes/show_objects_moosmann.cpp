@@ -31,7 +31,7 @@
 #include "utils/timer.h"
 #include "utils/velodyne_utils.h"
 #include "visualization/visualizer.h"
-//#inlcude "show_objects_moosmann2.h"
+
 #include "tclap/CmdLine.h"
 
 using std::string;
@@ -77,24 +77,9 @@ void ReadData(const Radians& angle_tollerance, const string& in_path,
     depth_ground_remover.OnNewObjectReceived(*cloud_ptr, 0);
    // auto current_millis = timer.measure(time_utils::Timer::Units::Milli);
    // fprintf(stderr, "INFO: It took %lu ms to process and show everything.\n",
-     //       current_millis);
+   //       current_millis);
 
-    //  sleep(1.4);
-      /*
-    uint max_wait_time = 100;
-    if (current_millis > max_wait_time) {
-      continue;
-    }
-    auto time_to_wait = max_wait_time - current_millis;
-    fprintf(stderr, "INFO: Waiting another %lu ms.\n", time_to_wait);
-    std::this_thread::sleep_for(std::chrono::milliseconds(time_to_wait));
-
-
-      */
-
-
-
-
+   //  sleep(1.0);
 
   }
 }
