@@ -25,9 +25,12 @@
 #include "image_labelers/diff_helpers/simple_diff.h"
 #include "utils/timer.h"
 
- cv::Mat binary_self_me_img(16,870, CV_8UC1);//=cv::Mat::zeros(64,870, CV_8UC1);
 
-cv::Mat binary_point_flag(16,870, CV_8UC1);//=cv::Mat::zeros(64,870, CV_8UC1);
+
+cv::Mat binary_self_me_img(16,870, CV_8UC1);
+cv::Mat binary_point_flag(16,870, CV_8UC1);
+cv::Mat ratio_flag(16,870, CV_32F);
+
 
 int i_no_groeund_image=0;
 char img_namround_image[6000];
@@ -101,42 +104,175 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud,
         // TODO(igor): test if its enough to remove only values starting from the
         // botom pixel. I don't like removing all values based on a threshold.
         // But that's a start, so let's stick with it for now.
+
+        /*
+        Mat dst;
+        for (int r = 8; r < 16; ++r) { //在这里只进行分析前８道激光
+            for (int c = 0; c <image.cols; ++c) {
+                dst.at<float>(r, c)= ;
+            }
+        }
+*/
+
+
+      //  sprintf(img_name_no_ground_image, "%s%d%s", ".//result//bin_img_jingzhi//dst", ++oui_nnd_image, ".png");
+      //  cv::imwrite(img_name_no_ground_image, image);
+
+        Mat src=Mat::zeros(16,870,CV_32F);;
+
+        //在这里只进行分析前８道激光
+
+        for (int c = 0; c <870; ++c) {
+/*
+            src.at<float>(0, c)= 1;
+            src.at<float>(1, c)= 2;
+            src.at<float>(2, c)= 2;
+            src.at<float>(3, c)= 3;
+            src.at<float>(4, c)= 4;
+            src.at<float>(5, c)= 6;
+            src.at<float>(6, c)= 13;
+            src.at<float>(7, c)= 15;
+
+            */
+
+            src.at<float>(15, c)= 1;
+            src.at<float>(14, c)= 2;
+            src.at<float>(13, c)= 2;
+            src.at<float>(12, c)= 3;
+            src.at<float>(11, c)= 4;
+            src.at<float>(10, c)= 6;
+            src.at<float>(9, c)= 13;
+            src.at<float>(8, c)= 15;
+
+
+        }
+
+        Mat dst=Mat::zeros(16,870,CV_32F);
+
+        float dst_a;
+        dst=image-src;
+
+/*
+        for (int c = 300; c <700; ++c) {
+            dst_a= image.at<float>(8, c);
+           // std::cout<<"THe value of the  binary_point_flag.at<uchar>(r,c) is :"<<dst_a<<std::endl;
+            std::cout<< "the dis is :"<<dst_a <<"    "<<"  c:"<< c<<std::endl;
+        }
+*/
+        // std::cout<<"THe value of the  binary_point_flag.at<uchar>(r,c) is :"<<std::endl;
+
+
+/*
+        for (int r = 8; r <16; ++r) {
+
+            for (int c = 300; c <700; ++c) {
+                ratio_flag.at<float>(r, c) = image.at<float>(r, c)/ src.at<float>(r, c);
+                std::cout << "THe value of the  ratio_flag.at<uchar>(r,c) is :" << ratio_flag.at<float>(r, c)
+                         <<" C is :"<<c<< std::endl;
+
+            }
+        }
+
+        */
+
+        for (int r = 8; r <16; ++r) {
+            for (int c = 300; c <870; ++c) {
+
+               if( dst.at<float>(r, c)>5){
+
+                   dst_a= dst.at<float>(r, c);
+
+                   ratio_flag.at<float>(r,c)=  src.at<float>(r, c)/image.at<float>(r, c);
+                   //在这里　判断一个比例，用于最后显示点云的缩放
+
+                   binary_point_flag.at<uchar>(r,c)=0;
+                   std::cout<<"THe value of the  ratio_flag.at<uchar>(r,c) is :"<<dst_a<<std::endl;
+               }
+
+
+            }
+        }
+
+
+
+   /*
+
+   float image_a;
+   float src_a;
+
+
+        for (int r = 8; r <16; ++r) {
+            for (int c = 0; c <870; ++c) {
+
+               // dst.at<float>(r, c)=image.at<float>(r, c) - src.at<float>(r, c);
+                image_a=image.at<float>(r, c)-3;
+                src_a=src.at<float>(r, c);
+                dst_a=image_a-src_a;
+
+            }
+        }
+*/
+      //  dst=image-src;
+
+/*
+        =Mat::zeros(16,350,CV_32F);
+
+
+            for (int c = 0; c <350; ++c) {
+
+                dst.at<float>(1, c)= 1;
+
+
+
+            }
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+        /*
         float k[9]={
                 1,1,1,
                 0,0,0,
                 -1,-1,-1};  //卷积3*3的核
         Mat Km;
         Km = cv::Mat(3,3,CV_32F,k);
-        Mat dst;
+
         filter2D(image, dst, image.depth(),Km,cv::Point(-1,-1));  //设参考点为核的中心
 
         Mat binary_self = Mat::zeros(image.rows,image.cols, CV_8UC1);
-       // ofstream fout("mytest.txt");
-        //if(!fout)
-      //  {
-      //      cout<<"File Not Opened"<<endl;
-      //  }
 
-        for (int r = 0; r < dst.rows; ++r) {
+
+        for (int r = 8; r < 16; ++r) { //在这里只进行分析前８道激光
             for (int c = 0; c <dst.cols; ++c) {
 
                // fout<<image.at<float>(r,c)<<"\t";
-                if(dst.at<float>(r, c)>-100){
+                if(dst.at<float>(r, c)>34){
+
+                binary_point_flag.at<uchar>(r,c)=0;
+
                    // binary_self.at<uchar>(r,c)=255;
-                    binary_self_me_img.at<uchar>(r, c) = 0;
-                    //std::cout<<"THE VALUE OF THE IS:"<<dst.at<float>(r, c)<<std::endl;
-                } else {
-                    std::cout << "THE VALUE OF THE IS:" << dst.at<float>(r, c) << std::endl;
+                   // binary_self_me_img.at<uchar>(r, c) = 0;
+                //std::cout<<"THE VALUE OF THE IS: st.at<float>:"<<dst.at<float>(r, c)<<std::endl;
                 }
+
             }
 
-            //fout<<std::endl;
         }
-       // fout.close();
-       // sprintf(img_name_no_ground_image, "%s%d%s", ".//result//dst//dst", ++oui_nnd_image, ".png");
-       // cv::imwrite(img_name_no_ground_image, dst);
+       // sprintf(img_name_no_ground_image, "%s%d%s", ".//result//bin_img//dst", ++oui_nnd_image, ".png");
+        //cv::imwrite(img_name_no_ground_image, binary_point_flag);
 
-
+*/
     }
 
 Mat DepthGroundRemover::ZeroOutGround(const cv::Mat& image,
@@ -153,18 +289,18 @@ Mat DepthGroundRemover::ZeroOutGround(const cv::Mat& image,
 
           res.at<float>(r, c) = image.at<float>(r, c);
 
-          binary_point_flag.at<uchar>(r,c)=0;
+        //  binary_point_flag.at<uchar>(r,c)=0;
 
-          ground_count++;
+         // ground_count++;
 
       }
     }
   }
 
-    std::cout<<"The value of the ground_count is:"<<ground_count<<std::endl;
-    ground_count=0;
-  sprintf(img_name_no_ground_image, "%s%d%s", ".//result//binary_image//binary_iamge", ++i_no_ground_image, ".png");
-  cv::imwrite(img_name_no_ground_image,binary_point_flag);
+  //  std::cout<<"The value of the ground_count is:"<<ground_count<<std::endl;
+   // ground_count=0;
+  //sprintf(img_name_no_ground_image, "%s%d%s", ".//result//binary_image//binary_iamge", ++i_no_ground_image, ".png");
+ // cv::imwrite(img_name_no_ground_image,binary_point_flag);
 
   return res;
 }

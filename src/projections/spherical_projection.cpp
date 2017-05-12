@@ -63,8 +63,8 @@ void SphericalProjection::InitFromPoints(const std::vector<RichPoint>& points) {
     i_count++;
   }
 
-  std::cout<<"Now it runs here the value of the i_count is :!!!"<<i_count<<std::endl;
-  i_count=0;
+ // std::cout<<"Now it runs here the value of the i_count is :!!!"<<i_count<<std::endl;
+  //i_count=0;
 }
 
 typename CloudProjection::Ptr SphericalProjection::Clone() const {

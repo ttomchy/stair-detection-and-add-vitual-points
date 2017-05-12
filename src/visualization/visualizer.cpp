@@ -24,7 +24,7 @@
 
 extern cv::Mat binary_point_flag;
 extern int  points_flag[16][870];
-
+extern cv::Mat ratio_flag;
 namespace depth_clustering {
 
 using std::string;
@@ -32,6 +32,8 @@ using std::vector;
 using std::array;
 using std::to_string;
 int  i_count2=0;
+
+float ratio_i;
 using std::map;
 using std::mutex;
 using std::string;
@@ -97,67 +99,15 @@ void Visualizer::init() {
   glDisable(GL_LIGHTING);
 }
 
-/*
-    void Visualizer::DrawCloud(const std::vector<RichPoint>& points) {
-      glPushMatrix();
-      glBegin(GL_POINTS);
-      // glColor3f(1.0f, 1.0f, 1.0f);
-      //glColor3f(1.0f, 0.0f, 0.0f);
-      for (size_t index = 0; index < points.size(); ++index) {
-     // for (const auto& point : cloud.points()) {
 
-        if ( point.flag_num() == 1){
-          glColor3f(0.0f, 1.0f, 0.0f);
-          glVertex3f(point.x(), point.y(), point.z());
-        }
-        else {
-          glColor3f(1.0f, 0.0f, 0.0f);
-          glVertex3f(point.x(), point.y(), point.z());
-
-        }
-
-        i_count2++;
-
-      }
-      std::cout<<" the valur of the i_count2 is :"<<i_count2<<std::endl;
-      i_count2=0;
-      glEnd();
-      glPopMatrix();
-
-    }
-*/
  void Visualizer::DrawCloud(const Cloud& cloud) {
   glPushMatrix();
   glBegin(GL_POINTS);
- // glColor3f(1.0f, 1.0f, 1.0f);
-  //glColor3f(1.0f, 0.0f, 0.0f);
 
    // for (const auto& point : cloud.points()) { //在这里会遍历所有的point 点
-       std::cout<<"THE VALUE OF THE  cloud.size() IS :"<<cloud.size()<<std::endl;
+    //   std::cout<<"THE VALUE OF THE  cloud.size() IS :"<<cloud.size()<<std::endl;
 
 
-/*
-        for (int r = 0; r < 16; ++r) {
-            for (int c = 0; c < 870; ++c) {
-
-                index =points_flag[r][c];
-                const auto& point = cloud[index];
-                if( binary_point_flag.at<uchar>(r,c)==0) {
-                    glColor3f(0.0f, 1.0f, 0.0f);
-                    glVertex3f(point.x(), point.y(), point.z());
-                }
-                else{
-
-                    glColor3f(1.0f, 0.0f, 0.0f);
-                    glVertex3f(point.x(), point.y(), point.z());
-
-                }
-
-
-            }
-        }
-
-*/
   int ground_count2=0;
 
   for (int index = 0; index < cloud.size(); ++index) {
@@ -168,29 +118,38 @@ void Visualizer::init() {
           for (int c = 0; c < 870; ++c) {
 
 
-          if(points_flag[r][c]==index ){
+          if(points_flag[r][c]==index ){  //不是地面的点用绿色来表示，地面的点用红色来表示。
 
               if( binary_point_flag.at<uchar>(r,c)==0) {
-                  ground_count2++;
-                  glColor3f(0.0f, 1.0f, 0.0f);
+
+                  if(point.x()>0){
+
+                  glColor3f(0.0f, 1.0f, 0.0f);//绿色
                   glVertex3f(point.x(), point.y(), point.z());
+
+                  ratio_i= ratio_flag.at<float>(r,c);
+                     if(ratio_i!=0)
+                     {
+
+                         glColor3f(0.0f, 0.0f, 1.0f);//蓝色
+                         glVertex3f(ratio_i*point.x(), ratio_i*point.y(), ratio_i*point.z());
+
+                     }
+
+                 //std::cout<<" the valur of the point.x() is :"<<point.x()<<std::endl;
+
+                  }
+                 //std::cout<<" the valur of the point.y() is :"<<point.y()<<std::endl;
+                 //std::cout<<" the valur of the point.z() is :"<<point.z()<<std::endl;
               }
               else{
-
                   glColor3f(1.0f, 0.0f, 0.0f);
                   glVertex3f(point.x(), point.y(), point.z());
-
               }
              }
           }
       }
-
-      ground_count2++;
   }
-
-  std::cout<<" the valur of the ground_count2 is :"<<ground_count2<<std::endl;
-
-  i_count2=0;
   glEnd();
   glPopMatrix();
 
