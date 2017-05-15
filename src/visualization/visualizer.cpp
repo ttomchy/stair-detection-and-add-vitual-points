@@ -25,6 +25,8 @@
 extern cv::Mat binary_point_flag;
 extern int  points_flag[16][870];
 extern cv::Mat ratio_flag;
+
+extern cv::Mat  ground_point_flag;
 namespace depth_clustering {
 
 using std::string;
@@ -95,7 +97,9 @@ void Visualizer::draw() {
 
 void Visualizer::init() {
   setSceneRadius(100.0);
-  camera()->showEntireScene();
+ // glClearColor(0.5f, 0.8f, 0.4f, 0.0f);
+    glClearColor(0.0,0.0,0.0,0.0);
+    camera()->showEntireScene();
   glDisable(GL_LIGHTING);
 }
 
@@ -120,31 +124,47 @@ void Visualizer::init() {
 
           if(points_flag[r][c]==index ){  //不是地面的点用绿色来表示，地面的点用红色来表示。
 
-              if( binary_point_flag.at<uchar>(r,c)==0) {
+              if( binary_point_flag.at<uchar>(r,c)==0) {//这里是判断有没有台阶的存在
 
-                  if(point.x()>0){
+                  if(point.x()>0) {
 
-                  glColor3f(0.0f, 1.0f, 0.0f);//绿色
-                  glVertex3f(point.x(), point.y(), point.z());
+                      glColor3f(1.0, 1.0, 0.0);  //  台阶的话用黄色  表示出来
+                      glVertex3f(point.x(), point.y(), point.z());
 
-                  ratio_i= ratio_flag.at<float>(r,c);
-                     if(ratio_i!=0)
-                     {
+                      ratio_i = ratio_flag.at<float>(r, c);
+                      if (ratio_i != 0) {
+                          glColor3f(1.0f, 0.0f, 0.0f);//　在这里用红色的点来进行显示虚拟的自己加上去的点
+                          glVertex3f(ratio_i * point.x(), ratio_i * point.y(), ratio_i * point.z());
 
-                         glColor3f(0.0f, 0.0f, 1.0f);//蓝色
-                         glVertex3f(ratio_i*point.x(), ratio_i*point.y(), ratio_i*point.z());
-
-                     }
-
-                 //std::cout<<" the valur of the point.x() is :"<<point.x()<<std::endl;
-
+                      }
                   }
-                 //std::cout<<" the valur of the point.y() is :"<<point.y()<<std::endl;
-                 //std::cout<<" the valur of the point.z() is :"<<point.z()<<std::endl;
               }
               else{
-                  glColor3f(1.0f, 0.0f, 0.0f);
-                  glVertex3f(point.x(), point.y(), point.z());
+
+                  if( ground_point_flag.at<uchar>(r,c)==0) {
+
+                      glColor3f(1.0f, 1.0f, 1.0f);//非地面的点用白色颜色画出来
+                      glVertex3f(point.x(), point.y(), point.z());
+                  }
+                  else{
+
+                      if(point.x()>0) {
+                          glColor3f(0.0f, 1.0f, 0.0f);//地面的点用绿色来表示出来
+                          glVertex3f(point.x(), point.y(), point.z());
+                      }
+
+                      else{
+
+                          glColor3f(1.0f, 1.0f, 1.0f);//车后面的点也要用白色显示出来
+                          glVertex3f(point.x(), point.y(), point.z());
+                      }
+                  }
+
+
+                  //glColor3f(1.0f, 0.0f, 0.0f);//其余颜色的话都用红色来进行表示出来，刚开始的话在这里是没有去区分地面的颜色的
+                 // glVertex3f(point.x(), point.y(), point.z());
+
+
               }
              }
           }
